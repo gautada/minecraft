@@ -1,82 +1,49 @@
-ARG ALPINE_VERSION=latest
+ARG JAVA_VERSION=13.3
+FROM docker.io/gautada/java:${JAVA_VERSION} AS container
 
-# │ STAGE: CONTAINER
-# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――
-FROM docker.io/gautada/alpine:$ALPINE_VERSION as CONTAINER
-
-# ╭――――――――――――――――――――╮
-# │ METADATA           │
-# ╰――――――――――――――――――――╯
 LABEL source="https://github.com/gautada/minecraft-container.git"
 LABEL maintainer="Adam Gautier <adam@gautier.org>"
-LABEL description="A container for minecraft server"
+LABEL description="A container for a minecraft server based on paper"
 
-# ╭―
-# │ USER
-# ╰――――――――――――――――――――
-ARG USER=minecraft
-RUN /usr/sbin/usermod -l $USER alpine
-RUN /usr/sbin/usermod -d /home/$USER -m $USER
-RUN /usr/sbin/groupmod -n $USER alpine
-RUN /bin/echo "$USER:$USER" | /usr/sbin/chpasswd
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends screen \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# ╭―
-# │ PRIVILEGES
-# ╰――――――――――――――――――――
-# COPY privileges /etc/container/privileges
+RUN mkdir -p /mnt/volumes/container /mnt/volumes/backup 
 
-# ╭―
-# │ BACKUP
-# ╰――――――――――――――――――――
-COPY backup /etc/container/backup
+# WORKDIR /opt
+# ADD https://download.java.net/java/early_access/jdk25/7/GPL/openjdk-25-ea+7_linux-aarch64_bin.tar.gz jdk-25.tgz
+# RUN /usr/bin/tar zxf jdk-25.tgz \
+#  && /usr/bin/mv jdk-25 jdk \
+#  && /usr/bin/rm jdk-25.tgz \
+#  && /usr/bin/ln -fsv /opt/jdk/bin/java /usr/bin/java
 
+# ╭――――――――――――――――――――╮
+# │ USER               │
+# ╰――――――――――――――――――――╯
+# Rename the base user to this container user.
+# Follows the same pattern as other gautada containers.
+ARG OLDUSER=duke
+ARG USER=steve
+RUN /usr/sbin/usermod -l $USER $OLDUSER \
+ && /usr/sbin/usermod -d /home/$USER -m $USER \
+ && /usr/sbin/groupmod -n $USER $OLDUSER \
+ && PASSWORD="$(openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 24)" \
+ && printf '%s:%s\n' "$USER" "$PASSWORD" | /usr/sbin/chpasswd
 
-# ╭―
-# │ ENTRYPOINT
-# ╰――――――――――――――――――――
-COPY entrypoint /etc/container/entrypoint
-
-# ╭―
-# │ APPLICATION
-# ╰――――――――――――――――――――
-RUN /sbin/apk add --no-cache openjdk21-jre-headless screen
-
-ARG CONTAINER_VERSION="1.20.4"
-ARG MINECRAFT_VERSION="$CONTAINER_VERSION"
-ARG PAPER_VERSION="409"
-
-ARG MINECRAFT_VERSION="1.20.4"
-ARG PAPER_VERSION="436"
-
-ARG SPIGOT_VERSION="427"
-ARG FLOODGATE_VERSION="90"
-
-RUN ln -fsv /mnt/volumes/container /home/$USER/server
-
+ARG MINECRAFT_VERSION="1.26.3"
 WORKDIR /opt/minecraft
- 
-ADD https://api.papermc.io/v2/projects/paper/versions/$MINECRAFT_VERSION/builds/$PAPER_VERSION/downloads/paper-$MINECRAFT_VERSION-$PAPER_VERSION.jar paper-$MINECRAFT_VERSION-$PAPER_VERSION.jar
+ADD https://piston-data.mojang.com/v1/objects/33680f5f2ac32864d6d7cf5e56a705fdb3e05f4c/server.jar minecraft-${MINECRAFT_VERSION}.jar
+RUN ln -fsv minecraft-${MINECRAFT_VERSION}.jar minecraft.jar \
+ && /usr/bin/chown -R $USER:$USER /opt/minecraft \
+ && /usr/bin/chown -R $USER:$USER /mnt/volumes/container \
+ && ln -fsv /mnt/volumes/container /home/$USER/server
 
-ADD https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/$SPIGOT_VERSION/downloads/spigot spigot-$MINECRAFT_VERSION-$SPIGOT_VERSION.jar
+COPY etc/services.d/minecraft/run /etc/services.d/minecraft/run
+RUN chmod +x /etc/services.d/minecraft/run 
 
-ADD https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/$FLOODGATE_VERSION/downloads/spigot floodgate-$MINECRAFT_VERSION-$FLOODGATE_VERSION.jar
-
-# ╭―
-# │ CONFIGURATION
-# ╰――――――――――――――――――――
-RUN chown -R $USER:$USER /home/$USER
-RUN chown -R $USER:$USER /opt/minecraft
-USER $USER
 VOLUME /mnt/volumes/backup
-VOLUME /mnt/volumes/configmaps
 VOLUME /mnt/volumes/container
-VOLUME /mnt/volumes/secrets
-VOLUME /mnt/volumes/source
 EXPOSE 25565/tcp
-EXPOSE 25565/udp
-# EXPOSE 19132/udp
 WORKDIR /home/$USER/server
-
-
- 
-

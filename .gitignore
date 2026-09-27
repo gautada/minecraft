@@ -1,10 +1,36 @@
-# Ignore Xcode files
-*.xcodeproj/
-config.yml
-ops.json
+# This template file is stored at
+# [GitHub Gist](https://gist.github.com/gautada/3a0a4a76d3c7e4539e71fc02c7f599ad)
 
-volumes
-*~
+# XCode - Project files 
+*.xcodeproj/
+
+# Desktop Services Store - Custom view preferences
 .DS_Store
+
+# **Volume Folders** are used in development to set runtime data, usuaully 
+# this is private data and should almost **NEVER** be loaded into version
+# control
+**-volume/
+
+# **Manifest Folder** is the k8s yaml files that deploy the container, usually
+# this folder is sourced from a private repository and should not be public.
+manifest/
+
+# `.dockerignore` file allows you to specify a list of files or directories 
+# that Docker is to ignore during the build process. To create jusr
+# symlink to this files `ln -s .gitignore .dockerignore`
+.dockerignore
+
+# The files are generally for container development. The linters should 
+# generally come from the templates of cicd.
 .env
-manifest
+.flake8
+.hadolint.yaml
+.htmlhintrc
+.jscpd.json
+.markdownlint.yaml
+.pre-commit-config.yaml
+.shellcheckrc
+.sqlfluff
+.yamllint.yaml
+pyproject.toml
