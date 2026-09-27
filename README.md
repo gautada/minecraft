@@ -4,28 +4,37 @@ Use `screen -rx` to attach and then `Ctrl A - D` to detach
 
 ## Server Setup
 
-This is a minecraft server based on [PaperMC](https://papermc.io) patches for performance and uses [GeyserMC Spigot](https://geysermc.org) as a Bedrock proxy with [GeyserMC Floodgate](https://geysermc.org) to bypass Java paid edition login.
+This is a minecraft server based on [PaperMC](https://papermc.io) patches for
+performance and uses [GeyserMC Spigot](https://geysermc.org) as a Bedrock proxy
+with [GeyserMC Floodgate](https://geysermc.org) to bypass Java paid edition login.
 
-- [PaperMC](https://papermc.io): The most widely used, high-performance Minecraft server that aims to fix gameplay and mechanics inconsistencies.
-- [GeyserMC Spigot](https://geysermc.org): Enable clients from Minecraft Bedrock Edition to join your Minecraft Java server.
-- [GeyserMC Floodgate](https://geysermc.org): Allows Geyser players to join servers without needing to log into a paid Java Edition account.
+- [PaperMC](https://papermc.io): The most widely used, high-performance
+  Minecraft server that aims to fix gameplay and mechanics inconsistencies.
+- [GeyserMC Spigot](https://geysermc.org): Enable clients from Minecraft
+  Bedrock Edition to join your Minecraft Java server.
+- [GeyserMC Floodgate](https://geysermc.org): Allows Geyser players to join
+  servers without needing to log into a paid Java Edition account.
 
 ## Notes
+
 - 2024-02-08: Rebuilt currently not using the geysermc proxy
-  - Uses screen to lunch the server so you can attach to a running server using `screen -x`.
-  - Simplified server options in the environment variable MINECRAFT_SERVER_OPTIONS for future use options where:
-  ```
-  -Xms1G -Xmx3G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=mcflags.emc.gs -Dcom.mojang.eula.agree=true
-  ```
+  - Uses screen to lunch the server so you can attach to a running server
+    using `screen -x`.
+  - Simplified server options in the environment variable
+    MINECRAFT_SERVER_OPTIONS for future use options where:
+
+    ```
+    -Xms1G -Xmx3G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=mcflags.emc.gs -Dcom.mojang.eula.agree=true
+    ```
+
   - Another option that was in the old configs `--nojline nogui`
-  - "Failed to get system info for Microarchitecture" warning seems to be related to https://github.com/PaperMC/Paper/issues/9785
+  - "Failed to get system info for Microarchitecture" warning seems to be
+    related to <https://github.com/PaperMC/Paper/issues/9785>
   - Testing the auto build
   - 2024-02-27: Possible backup strategy
 
-  
-
-
 ### Kubernetes
+
 ```
 apiVersion: v1
 kind: Service
@@ -81,7 +90,7 @@ spec:
       volumes:
       - name: minecraft-data
         persistentVolumeClaim:
-          claimName: minecraft-claim 
+          claimName: minecraft-claim
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -95,6 +104,3 @@ spec:
     requests:
       storage: 250Mi
 ```
-
-
-

@@ -1,0 +1,45 @@
+---
+name: Container CI/CD harness
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [dev, main]
+  push:
+
+permissions:
+  contents: write
+  pull-requests: write
+  security-events: write
+
+concurrency:
+  group: container-harness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforce-dev-only:
+    name: Only accept promotions from dev
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Reject any PR into main that isn't from dev
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [[ "${HEAD_REF}" != "dev" ]]; then
+            echo "::error::Direct PRs into main are not allowed - merge into dev first, then promote dev to main."
+            exit 1
+          fi
+
+  base:
+    uses: gautada/cicd/.github/workflows/cicd-base.yaml@main
+    with:
+      cicd_ref: main
+
+  container:
+    needs: base
+    uses: gautada/cicd/.github/workflows/cicd-container.yaml@main
+    secrets:
+      DOCKERIO_REGISTRY: ${{ secrets.DOCKERIO_REGISTRY }}
+      DOCKERIO_TOKEN: ${{ secrets.DOCKERIO_TOKEN }}
