@@ -42,7 +42,7 @@ RUN ln -fsv minecraft-${MINECRAFT_VERSION}.jar minecraft.jar \
 
 COPY etc/services.d/minecraft/run /etc/services.d/minecraft/run
 RUN chmod +x /etc/services.d/minecraft/run \
- && rm -rf /etc/services.d/java/run
+ && rm -rf /etc/services.d/java
 
 VOLUME /mnt/volumes/backup
 VOLUME /mnt/volumes/container
