@@ -5,6 +5,6 @@ HOME="/home/${USER}"
 export HOME
 
  exec s6-setuidgid "${USER}" \
-   /usr/bin/screen -m /usr/bin/java -Xmx1024M -Xms1024M \
+   /usr/bin/java -Xmx1024M -Xms1024M \
    -jar /opt/minecraft/minecraft.jar nogui
 
