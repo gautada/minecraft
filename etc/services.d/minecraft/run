@@ -1,10 +1,10 @@
+#!/bin/sh
 set -e
-
 USER=$(id -nu 1000)
 HOME="/home/${USER}"
 export HOME
-
- exec s6-setuidgid "${USER}" \
+cd "${HOME}/server"
+exec s6-setuidgid "${USER}" \
    /usr/bin/java -Xmx1024M -Xms1024M \
    -jar /opt/minecraft/minecraft.jar nogui
 
